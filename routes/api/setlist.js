@@ -6,4 +6,8 @@ router
   .route("/")
   .get(setlistController.findAll);
 
+router
+  .route("/:showDate")
+  .get(setlistController.getSetlistByDate)
+
 module.exports = router;
