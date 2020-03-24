@@ -1,9 +1,8 @@
 // const db = require("../models");
 const axios = require('axios');
 const phishnet = require('../utils/phishnet');
-const validate = require("../utils/validation");
+const validate = require('../utils/validation');
 const apiKey = process.env.PHISHNET_APIKEY;
-
 
 // Defining methods for the bookController
 module.exports = {
@@ -15,27 +14,39 @@ module.exports = {
   },
   /**
    * Get a show on a specific date
-   * @param {str} req.params.showDate  = "YYYY-MM-DD" 
+   * @param {str} req.params.showDate  = "YYYY-MM-DD"
    */
-  getSetlistByDate: function({params:{showDate}}, res) {
-    console.log('getting show on ', showDate);
-
-    if(! validate.dateFormat(showDate)){
-      return res.status(400).send("Invalid date param.")
+  getSetlistByDate: function({ params: { showDate } }, res) {
+  
+    if (!validate.dateFormat(showDate)) {
+      return res.status(400).send('Invalid date parameter.');
     }
 
     axios
       .get(
-        `https://api.phish.net/v3/setlists/get?apikey=${apiKey}&showdate=2019-09-01`
+        `https://api.phish.net/v3/setlists/get?apikey=${apiKey}&showdate=${showDate}`
       )
-      .then(data => {
+      .then(({ data: { response } }) => {
+        if (!response.count) {
+          return res.status(400).send('No show on that date.');
+        }
         // one complete show
-        const showData = data.data.response.data[0];
-        return res.json(showData);
+        const showData = response.data[0];
+
+        const showObj = {
+          phishnetShowId: showData.showId,
+          phishnetUrl: showData.url,
+          location:showData.location,
+          showDate: showData.showdate,
+          showDay: showData.long_date.split(" ")[0],
+          rating: showData.rating,
+          setlist: phishnet.parseShowHtml(showData.setlistdata)
+        };
+        return res.json(showObj);
       })
       .catch(err => {
         console.log('Error getting data: ', err);
-        return res.status(500).send('bad request');
+        return res.status(400).send('Error.  Please check the show date and try again.');
       });
   }
 };
