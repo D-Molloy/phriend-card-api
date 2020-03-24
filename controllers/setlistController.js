@@ -1,7 +1,7 @@
 // const db = require("../models");
 const axios = require('axios');
 const phishnet = require('../utils/phishnet');
-const validate = require('../utils/validation');
+const valid = require('../utils/validation');
 const apiKey = process.env.PHISHNET_APIKEY;
 
 // Defining methods for the bookController
@@ -18,7 +18,7 @@ module.exports = {
    */
   getSetlistByDate: function({ params: { showDate } }, res) {
   
-    if (!validate.dateFormat(showDate)) {
+    if (!valid.dateFormat(showDate)) {
       return res.status(400).send('Invalid date parameter.');
     }
 
