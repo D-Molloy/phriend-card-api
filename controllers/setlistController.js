@@ -1,7 +1,7 @@
 // const db = require("../models");
 const axios = require('axios');
 const phishnet = require('../utils/phishnet');
-const validate = require('../utils/validation');
+const valid = require('../utils/validation');
 const apiKey = process.env.PHISHNET_APIKEY;
 
 // Defining methods for the bookController
@@ -17,8 +17,7 @@ module.exports = {
    * @param {str} req.params.showDate  = "YYYY-MM-DD"
    */
   getSetlistByDate: function({ params: { showDate } }, res) {
-  
-    if (!validate.dateFormat(showDate)) {
+    if (!valid.dateFormat(showDate)) {
       return res.status(400).send('Invalid date parameter.');
     }
 
@@ -36,17 +35,20 @@ module.exports = {
         const showObj = {
           phishnetShowId: showData.showId,
           phishnetUrl: showData.url,
-          location:showData.location,
-          showDate: showData.showdate,
-          showDay: showData.long_date.split(" ")[0],
-          rating: showData.rating,
-          setlist: phishnet.parseShowHtml(showData.setlistdata)
+          venue: phishnet.parseVenueHtml(showData.venue),
+          location: showData.location,
+          date: showData.showdate,
+          day: showData.long_date.split(' ')[0],
+          rating: parseFloat(showData.rating),
+          setlist: phishnet.parseSetlistHtml(showData.setlistdata)
         };
         return res.json(showObj);
       })
       .catch(err => {
         console.log('Error getting data: ', err);
-        return res.status(400).send('Error.  Please check the show date and try again.');
+        return res
+          .status(400)
+          .send('Error.  Please check the show date and try again.');
       });
   }
 };

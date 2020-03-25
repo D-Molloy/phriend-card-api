@@ -1,0 +1,1 @@
+Screenshots - http://html2canvas.hertzen.com/
