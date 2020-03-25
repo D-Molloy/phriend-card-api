@@ -1,20 +1,17 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 
-const parseShowHtml = showHtml => {
-
-
+const parseSetlistHtml = showHtml => {
+  const $ = cheerio.load(showHtml);
+  let setCount = 0;
   let setlistInfo = {
     songCount: 0
   };
 
-  let setCount = 0;
-
-  const $ = cheerio.load(showHtml);
-
   $('[class^="set"]').each(function(_, element) {
     const songName = $(element).text();
     const className = $(element).attr('class');
+
     if (className === 'set-label') {
       setCount++;
       setlistInfo[`set${setCount}`] = [];
@@ -29,6 +26,12 @@ const parseShowHtml = showHtml => {
   return setlistInfo;
 };
 
+const parseVenueHtml = venueHtml => {
+  const $ = cheerio.load(venueHtml);
+  return $('a').text();
+};
+
 module.exports = {
-  parseShowHtml
+  parseSetlistHtml,
+  parseVenueHtml
 };
