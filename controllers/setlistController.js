@@ -1,6 +1,6 @@
 // const db = require("../models");
 const axios = require('axios');
-const phishnet = require('../utils/phishnet');
+const {parseSetlistHtml, parseVenueHtml} = require('../utils/phishnet');
 const valid = require('../utils/validation');
 const apiKey = process.env.PHISHNET_APIKEY;
 
@@ -35,12 +35,12 @@ module.exports = {
         const showObj = {
           phishnetShowId: showData.showId,
           phishnetUrl: showData.url,
-          venue: phishnet.parseVenueHtml(showData.venue),
+          venue: parseVenueHtml(showData.venue),
           location: showData.location,
           date: showData.showdate,
           day: showData.long_date.split(' ')[0],
           rating: parseFloat(showData.rating),
-          setlist: phishnet.parseSetlistHtml(showData.setlistdata)
+          setlist: parseSetlistHtml(showData.setlistdata)
         };
         return res.json(showObj);
       })

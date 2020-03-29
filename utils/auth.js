@@ -1,6 +1,6 @@
-const bcrypt = require('bcrypt');
+// const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-console.log('process.env.ACCESS_TOKEN_SECRET', process.env.ACCESS_TOKEN_SECRET)
+
 
 
 // ensure the jwt is present and valid
@@ -25,3 +25,14 @@ const generateAccessToken = user => {
     expiresIn: 1000 * 60 * 60
   });
 };
+
+const middlewareTest = (req, res, next)  => {
+  console.log("MIDDLEWARE PLACEHOLDER")
+  next()
+};
+
+
+
+module.exports={
+  authenticateToken, generateAccessToken, middlewareTest
+}

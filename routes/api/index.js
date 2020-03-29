@@ -1,10 +1,12 @@
-const path = require("path");
+// const path = require("path");
 const router = require("express").Router();
 const setlistRoutes = require("./setlist");
+const authRoutes = require("./auth");
 // const googleRoutes = require("./google");
 
 // Setlist routes
 router.use("/setlist", setlistRoutes);
+router.use("/auth", authRoutes);
 
 // // Google Routes
 // router.use("/google", googleRoutes);
