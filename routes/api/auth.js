@@ -7,6 +7,11 @@ router
   .route("/create")
   .post(middlewareTest, authController.create);
 
+// Matches with POST "/api/auth/login"
+router
+  .route("/login")
+  .post(middlewareTest, authController.login);
+
 
 // Matches with "/api/setlist/yyyy-mm-dd"
 // router

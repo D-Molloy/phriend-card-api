@@ -1,12 +1,12 @@
 // const db = require("../models");
 const axios = require('axios');
-const {parseSetlistHtml, parseVenueHtml} = require('../utils/phishnet');
+const { parseSetlistHtml, parseVenueHtml } = require('../utils/phishnet');
 const valid = require('../utils/validation');
 const apiKey = process.env.PHISHNET_APIKEY;
 
 // Defining methods for the bookController
 module.exports = {
-  findAll: function(req, res) {
+  findAll: (req, res) => {
     res.send('finding all');
     // db.Book.find(req.query)
     //   .then(dbBook => res.json(dbBook))
@@ -16,7 +16,7 @@ module.exports = {
    * Get a show on a specific date
    * @param {str} req.params.showDate  = "YYYY-MM-DD"
    */
-  addSetlistByDate: function({ params: { showDate } }, res) {
+  addSetlistByDate: ({ params: { showDate } }, res) => {
     if (!valid.dateFormat(showDate)) {
       return res.status(400).send('Invalid date parameter.');
     }
