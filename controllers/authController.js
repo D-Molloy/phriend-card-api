@@ -65,5 +65,24 @@ module.exports = {
       console.log('e - ', e);
       res.status(500).send('Please try again.');
     }
+  },
+  refreshToken: (req, res) => {
+    const refreshToken = req.body.token;
+    if (!refreshToken) return res.status(401);
+    // refreshToken should be saved in DB
+    if (!refreshTokens.includes(refreshToken)) return res.status(403);
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+      if (err) return res.status(403);
+      const accessToken = generateAccessToken({ name: user.username });
+      // TODO: need to include refresh token as well? `const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);`
+
+      res.json({ accessToken });
+    });
+  },
+  logout: (req, res) => {
+    if (!req.body.token) return res.sendStatus(400);
+    // remove from DB
+    refreshTokens = refreshTokens.filter(token => token !== req.body.token);
+    res.sendStatus(204);
   }
 };
