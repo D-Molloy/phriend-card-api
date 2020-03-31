@@ -1,21 +1,12 @@
 // const db = require("../models");
 // const axios = require('axios');
 const bcrypt = require('bcrypt');
+
 const { authenticateToken } = require('../utils/auth');
 const { signupValidate } = require('../utils/validation');
 
-// stored in DB
+// Mock data from example - should be stored in DB
 const users = [];
-const posts = [
-  {
-    name: 'Denis',
-    title: 'Post 1'
-  },
-  {
-    name: 'Amanda',
-    title: 'Post 2'
-  }
-];
 let refreshTokens = [];
 
 // const apiKey = process.env.PHISHNET_APIKEY;
@@ -52,11 +43,13 @@ module.exports = {
         };
 
         const accessToken = generateAccessToken(user);
-        const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);
+        // TODO: decide whether to give refreshToken or not.
+        // const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);
         // save refreshtokens in DB
         refreshTokens.push(refreshToken);
 
         // send the JWT to the user
+        // res.send({ accessToken, refreshToken });
         res.send({ accessToken, refreshToken });
       } else {
         res.status(400).send('Check credentials and try again');
