@@ -8,9 +8,11 @@ router.use("/api", apiRoutes);
 
 
 // If no API routes are hit, send the React app
-router.use((req, res) =>
+router.use((req, res) =>{
+console.log(req.originalUrl)
+
  res.status(404).send("Invalid endpoint")
   // res.sendFile(path.join(__dirname, "../client/build/index.html"))
-);
+});
 
 module.exports = router;
