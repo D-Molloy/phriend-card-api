@@ -1,36 +1,42 @@
-// const db = require("../models");
-// const axios = require('axios');
+const db = require('../models');
 const bcrypt = require('bcrypt');
 
-const { authenticateToken } = require('../utils/auth');
-const { signupValidate } = require('../utils/validation');
-
-// Mock data from example - should be stored in DB
-const users = [];
-let refreshTokens = [];
-
-// const apiKey = process.env.PHISHNET_APIKEY;
+const { validateSignup, validateLogin } = require('../utils/validation');
 
 // Defining methods for the bookController
 module.exports = {
   create: async (req, res) => {
-    const { username, email, password, password2 } = req.body;
-    //TODO: VALIDATE ()
-    //TODO: check DB to see if user already exists
+    // validate user info
+    const { errors, userData } = validateSignup(req.body);
+    if (!userData) {
+      return res.status(400).json(errors);
+    }
+    //check if user already exists
+    const foundUser = await db.User.findOne({ email: userData.email });
+    if (foundUser) {
+      return res
+        .status(400)
+        .json({ email: 'Email already associated with an account.' });
+    }
 
+    // create a new user
     try {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      //TODO: create user in DB
-      // TODO: send hack user data?
-      res.status(201).send({ username, email, hashedPassword });
+      // hash the password
+      const hashedPassword = await bcrypt.hash(userData.password, 10);
+      userData.password = hashedPassword;
+      // create user
+      await db.User.create(userData);
+      res.send('User created!');
     } catch (e) {
-      console.log(`Error encrypting password`, e);
-      res.status(500).send('Error encrypting password. Please try again.');
+      res.status(500).send({
+        message: 'Server error.  Please try again.',
+        data: e.message,
+      });
     }
   },
   login: async ({ body: { username, password } }, res) => {
     // check db to see if user exists
-    const user = users.find(user => user.username === username);
+    const user = users.find((user) => user.username === username);
     // if (!user) return res.status(400).send('Check credentials and try again');
 
     try {
@@ -39,7 +45,7 @@ module.exports = {
         // user logged in
         // Create JWT
         const user = {
-          username
+          username,
         };
 
         const accessToken = generateAccessToken(user);
@@ -75,7 +81,7 @@ module.exports = {
   logout: (req, res) => {
     if (!req.body.token) return res.sendStatus(400);
     // remove from DB
-    refreshTokens = refreshTokens.filter(token => token !== req.body.token);
+    refreshTokens = refreshTokens.filter((token) => token !== req.body.token);
     res.sendStatus(204);
-  }
+  },
 };
