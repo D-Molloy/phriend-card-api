@@ -2,34 +2,38 @@ const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
 
-const userSchema = new Schema(
+const showSchema = new Schema(
   {
-    username: {
+    phishnetUrl: {
       type: String,
       trim: true,
-      required: 'Enter a username.',
+      default: 'https://www.phish.net/',
     },
-    email: {
+    venue: {
       type: String,
       trim: true,
-      match: [/.+@.+\..+/, 'Please enter a valid e-mail address.'],
     },
-    password: {
-      type: Date,
+    location: {
+      type: String,
       trim: true,
-      required: 'Password required.',
     },
-    createdAt: {
-      type: Date,
-      default: () => new Date(),
+    // "2019-09-01"
+    date: {
+      type: String,
+      trim: true,
     },
-    shows: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: 'Show',
-      },
-    ],
+    day: {
+      type: String,
+      trim: true,
+    },
+    rating: {
+      type: Number,
+    },
+    setlist: {
+      type: Object,
+    },
   }
+
   // {
   //   toJSON: {
   //     // include any virtual properties when data is requested
@@ -46,6 +50,6 @@ const userSchema = new Schema(
 //   }, 0);
 // });
 
-const User = mongoose.model('User', userSchema);
+const Show = mongoose.model('Show', showSchema);
 
-module.exports = User;
+module.exports = Show;

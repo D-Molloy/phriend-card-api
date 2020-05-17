@@ -1,4 +1,4 @@
-// const db = require("../models");
+const db = require('../models');
 const axios = require('axios');
 const { parseSetlistHtml, parseVenueHtml } = require('../utils/phishnet');
 const valid = require('../utils/validation');
@@ -40,17 +40,17 @@ module.exports = {
           date: showData.showdate,
           day: showData.long_date.split(' ')[0],
           rating: parseFloat(showData.rating),
-          setlist: parseSetlistHtml(showData.setlistdata)
+          setlist: parseSetlistHtml(showData.setlistdata),
         };
         return res.json(showObj);
       })
-      .catch(err => {
+      .catch((err) => {
         console.log('Error getting data: ', err);
         return res
           .status(400)
           .send('Error.  Please check the show date and try again.');
       });
-  }
+  },
 };
 // https://api.phish.net/v3/setlists/get?apikey=A53B4CA86749D9E5CDE2&showdate=2019-09-01
 
