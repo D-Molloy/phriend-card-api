@@ -42,6 +42,8 @@ module.exports = {
           rating: parseFloat(showData.rating),
           setlist: parseSetlistHtml(showData.setlistdata),
         };
+        // push showObj into
+
         return res.json(showObj);
       })
       .catch((err) => {
