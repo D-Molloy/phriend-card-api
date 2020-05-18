@@ -92,4 +92,22 @@ const validateLogin = (data) => {
   };
 };
 
-module.exports = { validateSignup, validateLogin };
+const validateDate = ({ year, month, day }) => {
+  const errors = {};
+  if (isNaN(year) || year.length !== 4) {
+    errors.year = 'Please enter a valid year.';
+  }
+  if (isNaN(month) || month.length !== 2) {
+    errors.month = 'Please enter a valid month.';
+  }
+  if (isNaN(day) || day.length !== 2) {
+    errors.day = 'Please enter a valid day.';
+  }
+
+  return {
+    errors,
+    showDate: isEmpty(errors) ? `${year}-${month}-${day}` : null,
+  };
+};
+
+module.exports = { validateSignup, validateLogin, validateDate };
