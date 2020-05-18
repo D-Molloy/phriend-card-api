@@ -1,56 +1,113 @@
-
-const dateFormat = date => {
-  var re = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/;
-  return re.test(String(date));
-};
-
-
-const isEmpty = value =>
+// check if value is falsy
+const isEmpty = (value) =>
   value === undefined ||
   value === null ||
-  (typeof value === "object" && Object.keys(value).length === 0) ||
-  (typeof value === "string" && value.trim().length === 0);
+  (typeof value === 'object' && Object.keys(value).length === 0) ||
+  (typeof value === 'string' && value.trim().length === 0);
 
-const isEmail = email => {
+// ensure submitted email has valid syntax
+const isEmail = (email) => {
   var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  return re.test(String(email).toLowerCase());
+  return re.test(String(email));
 };
 
-const passwordMatch = (pass1, pass2) => {
-  if (!(pass1 === pass2)) {
-    return false;
+// validate phone
+// function isPhoneNum(phone) {
+//   var re = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+//   return re.test(String(phone));
+// }
+
+// Trim any whitespace off login values
+const trimObjVals = (obj) => {
+  const result = {};
+  for (let key in obj) {
+    result[key] = obj[key].trim();
   }
-  return true;
+  return result;
 };
 
-const signupValidate = (
-  { password, email },
-  password2,
-  currentPassword
-) => {
-  let errors = {};
+// compare to string to see if same
+const doPasswordsMatch = (pass1, pass2) => pass1 === pass2;
 
-  if (currentPassword) {
-    if (passwordMatch(password2, currentPassword)) {
-      errors.currentPassword = "Current and New password must be different.";
-    }
-  }
-  if (password.length <= 5) {
-    errors.password = "Please use a stronger password";
+// validate req.body when creating account
+const validateSignup = (data) => {
+  const errors = {};
+  const userData = trimObjVals(data);
+
+  if (isEmpty(userData.username)) {
+    errors.username = 'Name field required.';
   }
 
-  if (!passwordMatch(password, password2)) {
-    errors.password2 = "Passwords don't match.";
-  }
-  if (!isEmail(email)) {
-    errors.email = "Please enter a valid email.";
+  if (isEmpty(userData.email)) {
+    errors.email = 'Email field required.';
   }
 
-  return errors;
+  if (!isEmail(userData.email)) {
+    errors.email = 'Please enter a valid email.';
+  }
+
+  if (isEmpty(userData.password)) {
+    errors.password = 'Password field required.';
+  }
+
+  if (userData.password.length < 6) {
+    errors.password = 'Please use a stronger password.';
+  }
+
+  if (isEmpty(userData.confirmPassword)) {
+    errors.confirmPassword = 'Confirm Password field required.';
+  }
+
+  if (!doPasswordsMatch(userData.password, userData.confirmPassword)) {
+    errors.confirmPassword = 'Passwords must match.';
+  }
+
+  delete userData.confirmPassword;
+  userData.email = userData.email.toLowerCase();
+
+  return {
+    errors,
+    userData: isEmpty(errors) ? userData : null,
+  };
 };
 
+// validate login credentials
+const validateLogin = (data) => {
+  const errors = {};
+  const userData = trimObjVals(data);
+  if (isEmpty(userData.email)) {
+    errors.email = 'Email field required.';
+  }
+  if (!isEmail(userData.email)) {
+    errors.email = 'Please enter a valid email.';
+  }
 
-module.exports={
-  dateFormat, signupValidate
-}
+  if (isEmpty(userData.password)) {
+    errors.password = 'Password field required.';
+  }
 
+  return {
+    errors,
+    userData: isEmpty(errors) ? userData : null,
+  };
+};
+
+const validateDate = ({ year, month, day }) => {
+  const errors = {};
+  if (isNaN(year) || year.length !== 4) {
+    errors.year = 'Please enter a valid year.';
+  }
+  if (isNaN(month) || month.length !== 2) {
+    errors.month = 'Please enter a valid month.';
+  }
+  if (isNaN(day) || day.length !== 2) {
+    errors.day = 'Please enter a valid day.';
+  }
+
+  return {
+    errors,
+    showDate: isEmpty(errors) ? `${year}-${month}-${day}` : null,
+  };
+};
+
+module.exports = { validateSignup, validateLogin, validateDate };

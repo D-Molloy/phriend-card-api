@@ -1,81 +1,89 @@
-// const db = require("../models");
-// const axios = require('axios');
+const db = require('../models');
 const bcrypt = require('bcrypt');
-
-const { authenticateToken } = require('../utils/auth');
-const { signupValidate } = require('../utils/validation');
-
-// Mock data from example - should be stored in DB
-const users = [];
-let refreshTokens = [];
-
-// const apiKey = process.env.PHISHNET_APIKEY;
+const { generateAccessToken } = require('../utils/auth');
+const { validateSignup, validateLogin } = require('../utils/validation');
 
 // Defining methods for the bookController
 module.exports = {
   create: async (req, res) => {
-    const { username, email, password, password2 } = req.body;
-    //TODO: VALIDATE ()
-    //TODO: check DB to see if user already exists
+    // validate user info
+    const { errors, userData } = validateSignup(req.body);
+    if (!userData) {
+      return res.status(400).json(errors);
+    }
+    //check if user already exists
+    const foundUser = await db.User.findOne({ email: userData.email });
+    if (foundUser) {
+      return res
+        .status(400)
+        .json({ email: 'Email already associated with an account.' });
+    }
 
+    // create a new user
     try {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      //TODO: create user in DB
-      // TODO: send hack user data?
-      res.status(201).send({ username, email, hashedPassword });
+      // hash the password
+      const hashedPassword = await bcrypt.hash(userData.password, 10);
+      userData.password = hashedPassword;
+      // create user
+      await db.User.create(userData);
+      res.send('User created!');
     } catch (e) {
-      console.log(`Error encrypting password`, e);
-      res.status(500).send('Error encrypting password. Please try again.');
+      res.status(500).send({
+        message: 'Server error.  Please try again.',
+        data: e.message,
+      });
     }
   },
-  login: async ({ body: { username, password } }, res) => {
-    // check db to see if user exists
-    const user = users.find(user => user.username === username);
-    // if (!user) return res.status(400).send('Check credentials and try again');
+  login: async (req, res) => {
+    // validate login creds
+    const { errors, userData } = validateLogin(req.body);
+    if (!userData) {
+      return res.status(400).json(errors);
+    }
 
-    try {
-      // compare submitted password and hashed password of found user
-      if (await bcrypt.compare(password, user.hashedPassword)) {
-        // user logged in
-        // Create JWT
-        const user = {
-          username
-        };
+    // Check if user exists
+    const foundUser = await db.User.findOne({ email: userData.email });
+    if (!foundUser) {
+      return res
+        .status(404)
+        .json({ message: 'Email not registered. Please create an account.' });
+    }
 
-        const accessToken = generateAccessToken(user);
-        // TODO: decide whether to give refreshToken or not.
-        // const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);
-        // save refreshtokens in DB
-        refreshTokens.push(refreshToken);
+    // Check password
+    if (await bcrypt.compare(userData.password, foundUser.password)) {
+      // user logged in
+      // Create JWT
 
-        // send the JWT to the user
-        // res.send({ accessToken, refreshToken });
-        res.send({ accessToken, refreshToken });
-      } else {
-        res.status(400).send('Check credentials and try again');
-      }
-    } catch (e) {
-      console.log('e - ', e);
-      res.status(500).send('Please try again.');
+      const token = generateAccessToken({
+        _id: foundUser._id,
+        username: foundUser.username,
+      });
+      // send the JWT to the user
+      return res.send({ token });
+    } else {
+      // bad password
+      return res.status(403).json({
+        message: 'Please check credentials and try again',
+      });
     }
   },
-  refreshToken: (req, res) => {
-    const refreshToken = req.body.token;
-    if (!refreshToken) return res.status(401);
-    // refreshToken should be saved in DB
-    if (!refreshTokens.includes(refreshToken)) return res.status(403);
-    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
-      if (err) return res.status(403);
-      const accessToken = generateAccessToken({ name: user.username });
-      // TODO: need to include refresh token as well? `const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);`
+  // refreshToken: (req, res) => {
+  //   const refreshToken = req.body.token;
+  //   if (!refreshToken) return res.status(401);
+  //   // refreshToken should be saved in DB
+  //   if (!refreshTokens.includes(refreshToken)) return res.status(403);
+  //   jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+  //     if (err) return res.status(403);
+  //     const accessToken = generateAccessToken({ name: user.username });
+  //     // TODO: need to include refresh token as well? `const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET);`
 
-      res.json({ accessToken });
-    });
-  },
-  logout: (req, res) => {
-    if (!req.body.token) return res.sendStatus(400);
-    // remove from DB
-    refreshTokens = refreshTokens.filter(token => token !== req.body.token);
-    res.sendStatus(204);
-  }
+  //     res.json({ accessToken });
+  //   });
+  // },
+  // logout: (req, res) => {
+  //   if (!req.body.token) return res.sendStatus(400);
+  //   // remove from DB
+  //   refreshTokens = refreshTokens.filter((token) => token !== req.body.token);
+  //   res.sendStatus(204);
+  // },
 };
