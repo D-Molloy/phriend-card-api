@@ -6,7 +6,7 @@ const { authenticateToken, middlewareTest } = require('../../utils/auth');
 router.route('/create').post(authController.create);
 
 // Matches with POST "/api/auth/login"
-router.route('/login').post(middlewareTest, authController.login);
+router.route('/login').post(authController.login);
 
 // Matches with "/api/setlist/yyyy-mm-dd"
 // router
