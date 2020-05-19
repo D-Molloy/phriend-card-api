@@ -4,6 +4,11 @@ const Schema = mongoose.Schema;
 
 const showSchema = new Schema(
   {
+    phishnetShowId: {
+      type: Number,
+      trim: true,
+      unique: true,
+    },
     phishnetUrl: {
       type: String,
       trim: true,

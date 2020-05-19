@@ -26,14 +26,21 @@ module.exports = {
     // grab the user ID of the logged in user
     const { _id: currentUser } = user;
 
-    // TODO: check DB to see if the show exists
+    // check DB to see if the show exists
     const foundShow = await db.Show.findOne({
-      where: {
-        date: showDate,
-      },
+      date: showDate,
     });
 
+    // if show exists, push that into the user's shows array and send back updated show list
     if (foundShow) {
+      // TODO: push show into User's shows array
+      // Workout.findByIdAndUpdate(
+      //   params.id,
+      //   { $push: { exercises: body } },
+      //   // "runValidators" will ensure new exercises meet our schema requirements
+      //   { new: true, runValidators: true }
+      // )
+
       // if it exists, push that to show ID into user's shows array
       return res.send('show exists in db');
     } else {
@@ -53,7 +60,7 @@ module.exports = {
         } = response;
 
         const showObj = {
-          phishnetShowId: showData.showId,
+          phishnetShowId: showData.showid,
           phishnetUrl: showData.url,
           venue: parseVenueHtml(showData.venue),
           location: showData.location,
@@ -64,54 +71,20 @@ module.exports = {
         };
 
         // create the show in the db
-
-        return res.json(showObj);
+        try {
+          const createdShow = await db.Show.create(showObj);
+          console.log('createdShow', createdShow._id);
+          return res.json(createdShow);
+        } catch (e) {
+          console.log('E \n\n\n\n', e);
+          return res.status(500).send('error creating show');
+        }
       } catch (e) {
         console.log('Error getting show:', e);
         return res
           .status(400)
           .send('Error.  Please check the show date and try again.');
       }
-
-      // axios
-      //   .get(
-      //     `https://api.phish.net/v3/setlists/get?apikey=${apiKey}&showdate=${showDate}`
-      //   )
-      // .then(
-      //   ({
-      //     data: {
-      //       response: { data },
-      //     },
-      //   }) => {
-      //     console.log('reponse', reponse);
-
-      //       // if (!response.count) {
-      //       //   return res.status(400).send('No show on that date.');
-      //       // }
-      //       // // one complete show
-      //       // const showData = response.data[0];
-
-      //       // const showObj = {
-      //       //   phishnetShowId: showData.showId,
-      //       //   phishnetUrl: showData.url,
-      //       //   venue: parseVenueHtml(showData.venue),
-      //       //   location: showData.location,
-      //       //   date: showData.showdate,
-      //       //   day: showData.long_date.split(' ')[0],
-      //       //   rating: parseFloat(showData.rating),
-      //       //   setlist: parseSetlistHtml(showData.setlistdata),
-      //       // };
-
-      //       return res.json(data);
-      //     })
-      //     .catch((err) => {
-      //       console.log('Error getting data: ', err);
-      //       return res
-      //         .status(400)
-      //         .send('Error.  Please check the show date and try again.');
-      //     });
-      //   }
-      // );
     }
   },
 };
