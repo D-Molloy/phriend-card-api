@@ -4,7 +4,7 @@ const { parseSetlistHtml, parseVenueHtml } = require('../utils/phishnet');
 const { validateDate } = require('../utils/validation');
 const apiKey = process.env.PHISHNET_APIKEY;
 
-// Defining methods for the bookController
+// Defining methods related to setlists
 module.exports = {
   findAll: (req, res) => {
     res.send('finding all');
@@ -17,7 +17,7 @@ module.exports = {
    * @param {body} properties:  year, month day in ints
    * @param {user} currently logged in user
    */
-  addSetlistByDate: ({ body, user }, res) => {
+  addSetlistByDate: async ({ body, user }, res) => {
     // validate user submitted showdate
     const { errors, showDate } = validateDate(body);
     if (!showDate) {
@@ -27,40 +27,92 @@ module.exports = {
     const { _id: currentUser } = user;
 
     // TODO: check DB to see if the show exists
-    // if it exists, push that to show ID into user's shows array
-    // if it doesn't, make the request, parse show data, insert into the show db, then push show id to users shows array
-    res.json({ errors, showDate });
+    const foundShow = await db.Show.findOne({
+      where: {
+        date: showDate,
+      },
+    });
 
-    // axios
-    //   .get(
-    //     `https://api.phish.net/v3/setlists/get?apikey=${apiKey}&showdate=${showDate}`
-    //   )
-    //   .then(({ data: { response } }) => {
-    //     if (!response.count) {
-    //       return res.status(400).send('No show on that date.');
-    //     }
-    //     // one complete show
-    //     const showData = response.data[0];
+    if (foundShow) {
+      // if it exists, push that to show ID into user's shows array
+      return res.send('show exists in db');
+    } else {
+      // if it doesn't, make the request, parse show data, insert into the show db, then push show id to users shows array
+      try {
+        const {
+          data: { response },
+        } = await axios.get(
+          `https://api.phish.net/v3/setlists/get?apikey=${apiKey}&showdate=${showDate}`
+        );
 
-    //     const showObj = {
-    //       phishnetShowId: showData.showId,
-    //       phishnetUrl: showData.url,
-    //       venue: parseVenueHtml(showData.venue),
-    //       location: showData.location,
-    //       date: showData.showdate,
-    //       day: showData.long_date.split(' ')[0],
-    //       rating: parseFloat(showData.rating),
-    //       setlist: parseSetlistHtml(showData.setlistdata),
-    //     };
+        if (response.count === 0) {
+          return res.status(400).send('No show on that date.');
+        }
+        const {
+          data: [showData],
+        } = response;
 
-    //     return res.json(showObj);
-    //   })
-    //   .catch((err) => {
-    //     console.log('Error getting data: ', err);
-    //     return res
-    //       .status(400)
-    //       .send('Error.  Please check the show date and try again.');
-    //   });
+        const showObj = {
+          phishnetShowId: showData.showId,
+          phishnetUrl: showData.url,
+          venue: parseVenueHtml(showData.venue),
+          location: showData.location,
+          date: showData.showdate,
+          day: showData.long_date.split(' ')[0],
+          rating: parseFloat(showData.rating),
+          setlist: parseSetlistHtml(showData.setlistdata),
+        };
+
+        // create the show in the db
+
+        return res.json(showObj);
+      } catch (e) {
+        console.log('Error getting show:', e);
+        return res
+          .status(400)
+          .send('Error.  Please check the show date and try again.');
+      }
+
+      // axios
+      //   .get(
+      //     `https://api.phish.net/v3/setlists/get?apikey=${apiKey}&showdate=${showDate}`
+      //   )
+      // .then(
+      //   ({
+      //     data: {
+      //       response: { data },
+      //     },
+      //   }) => {
+      //     console.log('reponse', reponse);
+
+      //       // if (!response.count) {
+      //       //   return res.status(400).send('No show on that date.');
+      //       // }
+      //       // // one complete show
+      //       // const showData = response.data[0];
+
+      //       // const showObj = {
+      //       //   phishnetShowId: showData.showId,
+      //       //   phishnetUrl: showData.url,
+      //       //   venue: parseVenueHtml(showData.venue),
+      //       //   location: showData.location,
+      //       //   date: showData.showdate,
+      //       //   day: showData.long_date.split(' ')[0],
+      //       //   rating: parseFloat(showData.rating),
+      //       //   setlist: parseSetlistHtml(showData.setlistdata),
+      //       // };
+
+      //       return res.json(data);
+      //     })
+      //     .catch((err) => {
+      //       console.log('Error getting data: ', err);
+      //       return res
+      //         .status(400)
+      //         .send('Error.  Please check the show date and try again.');
+      //     });
+      //   }
+      // );
+    }
   },
 };
 // https://api.phish.net/v3/setlists/get?apikey=A53B4CA86749D9E5CDE2&showdate=2019-09-01
