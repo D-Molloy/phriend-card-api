@@ -4,6 +4,16 @@ const { parseSetlistHtml, parseVenueHtml } = require('../utils/phishnet');
 const { validateDate } = require('../utils/validation');
 const apiKey = process.env.PHISHNET_APIKEY;
 
+const updateUserShowArray = async (userId, showId) => {
+  const { shows } = await db.User.findByIdAndUpdate(
+    userId,
+    { $addToSet: { shows: showId } },
+    { new: true }
+  ).populate('shows');
+
+  return shows;
+};
+
 // Defining methods related to setlists
 module.exports = {
   findAll: (req, res) => {
@@ -33,16 +43,7 @@ module.exports = {
 
     // if show exists, push that into the user's shows array and send back updated show list
     if (foundShow) {
-      // TODO: push show into User's shows array
-      // Workout.findByIdAndUpdate(
-      //   params.id,
-      //   { $push: { exercises: body } },
-      //   // "runValidators" will ensure new exercises meet our schema requirements
-      //   { new: true, runValidators: true }
-      // )
-
-      // if it exists, push that to show ID into user's shows array
-      return res.send('show exists in db');
+      return res.json(await updateUserShowArray(currentUser, foundShow._id));
     } else {
       // if it doesn't, make the request, parse show data, insert into the show db, then push show id to users shows array
       try {
@@ -73,10 +74,11 @@ module.exports = {
         // create the show in the db
         try {
           const createdShow = await db.Show.create(showObj);
-          console.log('createdShow', createdShow._id);
-          return res.json(createdShow);
+
+          return res.json(
+            await updateUserShowArray(currentUser, createdShow._id)
+          );
         } catch (e) {
-          console.log('E \n\n\n\n', e);
           return res.status(500).send('error creating show');
         }
       } catch (e) {
