@@ -8,6 +8,9 @@ const { authenticateToken } = require('../../utils/auth');
 
 // Matches with "/api/setlist/"
 router.route('/').post(authenticateToken, setlistController.addSetlistByDate);
-// .post(setlistController.addSetlistByDate);
+
+router
+  .route('/:id')
+  .delete(authenticateToken, setlistController.removeShowFromUser);
 
 module.exports = router;

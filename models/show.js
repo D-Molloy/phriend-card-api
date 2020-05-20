@@ -37,6 +37,10 @@ const showSchema = new Schema(
     setlist: {
       type: Object,
     },
+    createdAt: {
+      type: Date,
+      default: () => new Date(),
+    },
   }
 
   // {
