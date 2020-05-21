@@ -30,24 +30,80 @@ const userSchema = new Schema(
       {
         type: Schema.Types.ObjectId,
         ref: 'Show',
+        unique: true,
       },
     ],
+  },
+  {
+    toJSON: {
+      // include any virtual properties when data is requested
+      virtuals: true,
+    },
   }
-  // {
-  //   toJSON: {
-  //     // include any virtual properties when data is requested
-  //     virtuals: true,
-  //   },
-  // }
 );
 
-// // adds a dynamically-created property to schema
-// userSchema.virtual("totalDuration").get(function () {
-//   // "reduce" array of exercises down to just the sum of their durations
-//   return this.exercises.reduce((total, exercise) => {
-//     return total + exercise.duration;
-//   }, 0);
-// });
+// adds a dynamically-created property to schema
+userSchema.virtual('totalSongsHeard').get(function () {
+  return this.shows.reduce((total, show) => total + show.setlist.songCount, 0);
+});
+// calculate average show rating
+userSchema.virtual('showScoreAverage').get(function () {
+  return (
+    this.shows.reduce((total, show) => total + show.rating, 0) /
+    this.shows.length
+  );
+});
+
+// create an object that counts the number of times each song has been heard
+userSchema.virtual('timesSongHeard').get(function () {
+  // return this.shows.reduce((acc, { setlist }) => {
+  //   for (key in setlist) {
+  //     if (Array.isArray(setlist[key])) {
+  //       for (song of setlist[key]) {
+  //         acc[song] = ++acc[song] || 1;
+  //       }
+  //     }
+  //   }
+  //   return acc;
+  // }, {});
+  const timesSongHeard = this.shows.reduce((acc, { setlist }) => {
+    for (key in setlist) {
+      if (Array.isArray(setlist[key])) {
+        for (song of setlist[key]) {
+          acc[song] = ++acc[song] || 1;
+        }
+      }
+    }
+    return acc;
+  }, {});
+  // TODO: this produces an array of tuples sorted by play count descending
+  var sortable = [];
+  for (var key in timesSongHeard)
+    if (timesSongHeard.hasOwnProperty(key))
+      sortable.push([key, timesSongHeard[key]]); // each item is an array in format [key, value]
+
+  // sort items by value
+  return sortable.sort(function (a, b) {
+    // return a[1] - b[1]; // compare numbers+
+    if (a[1] > b[1]) {
+      return -1;
+    }
+    if (a[1] < b[1]) {
+      return 1;
+    }
+    // a must be equal to b
+    return 0;
+  });
+
+  // TODO: this produces a alphabetically sorted list
+  // const ordered = {};
+  // Object.keys(timesSongHeard)
+  //   .sort()
+  //   .forEach(function (key) {
+  //     ordered[key] = timesSongHeard[key];
+  //   });
+  // return ordered;
+});
 
 const User = mongoose.model('User', userSchema);
 
