@@ -10,7 +10,7 @@ const updateUserShowArray = async (userId, showId) => {
     { $addToSet: { shows: showId } },
     { new: true }
   ).populate('shows');
-  console.log('shows', shows);
+
   return shows;
 };
 
@@ -91,10 +91,11 @@ module.exports = {
   },
   /**
    * Delete a show from the users
-   * @param {body} properties:  year, month day in ints
-   * @param {user} currently logged in user
+   * @param {showId} the mongoId for the show to remove
+   * @param {userId} currently logged in user
    */
   removeShowFromUser: async ({ params: { id: showId }, user: userId }, res) => {
+    console.log('userId', userId);
     // remove show from Users show array
     await db.User.updateOne(
       { _id: userId },
@@ -103,7 +104,12 @@ module.exports = {
       }
     );
     // get updated shows array
-    const { shows } = await db.User.findByIdAndUpdate(userId).populate('shows');
+    const { shows } = await db.User.findOne(userId).populate('shows');
     res.json(shows);
+  },
+  //
+  getAllShowsForUser: async ({ user: { _id } }, res) => {
+    const userInfo = await db.User.findOne({ _id }).populate('shows');
+    res.json(userInfo);
   },
 };

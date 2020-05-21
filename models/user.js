@@ -33,22 +33,58 @@ const userSchema = new Schema(
         unique: true,
       },
     ],
+  },
+  {
+    toJSON: {
+      // include any virtual properties when data is requested
+      virtuals: true,
+    },
   }
-  // {
-  //   toJSON: {
-  //     // include any virtual properties when data is requested
-  //     virtuals: true,
-  //   },
-  // }
 );
 
-// // adds a dynamically-created property to schema
-// userSchema.virtual("totalDuration").get(function () {
-//   // "reduce" array of exercises down to just the sum of their durations
-//   return this.exercises.reduce((total, exercise) => {
-//     return total + exercise.duration;
-//   }, 0);
-// });
+// adds a dynamically-created property to schema
+userSchema.virtual('totalSongsHeard').get(function () {
+  return this.shows.reduce((total, show) => total + show.setlist.songCount, 0);
+});
+// calculate average show rating
+userSchema.virtual('showScoreAverage').get(function () {
+  return (
+    this.shows.reduce((total, show) => total + show.rating, 0) /
+    this.shows.length
+  );
+});
+
+// create an object that counts the number of times each song has been heard
+userSchema.virtual('timesSongHeard').get(function () {
+  return this.shows.reduce((acc, { setlist }) => {
+    for (key in setlist) {
+      if (Array.isArray(setlist[key])) {
+        for (song of setlist[key]) {
+          acc[song] = ++acc[song] || 1;
+        }
+      }
+    }
+    return acc;
+  }, {});
+  // TODO: this produces a alphabetically sorted list
+  // const timesSongHeard = this.shows.reduce((acc, { setlist }) => {
+  //   for (key in setlist) {
+  //     if (Array.isArray(setlist[key])) {
+  //       for (song of setlist[key]) {
+  //         acc[song] = ++acc[song] || 1;
+  //       }
+  //     }
+  //   }
+  //   return acc;
+  // }, {});
+  // const ordered = {};
+  // Object.keys(timesSongHeard)
+  //   .sort()
+  //   .forEach(function (key) {
+  //     ordered[key] = timesSongHeard[key];
+  //   });
+  // return ordered;
+});
 
 const User = mongoose.model('User', userSchema);
 
