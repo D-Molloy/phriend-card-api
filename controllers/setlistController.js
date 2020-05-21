@@ -16,14 +16,16 @@ const updateUserShowArray = async (userId, showId) => {
 
 // Defining methods related to setlists
 module.exports = {
-  findAll: (req, res) => {
-    res.send('finding all');
-    // db.Book.find(req.query)
-    //   .then(dbBook => res.json(dbBook))
-    //   .catch(err => res.status(422).json(err));
+  /**
+   * GET shows array for current user
+   * @param {_id} mongo id for the current user
+   */
+  getAllShowsForUser: async ({ user: { _id } }, res) => {
+    const { shows } = await db.User.findOne({ _id }).populate('shows');
+    res.json(shows);
   },
   /**
-   * Get a show on a specific date and add to user's shows array
+   * POST a show on a specific date and add to user's shows array
    * @param {body} properties:  year, month day in ints
    * @param {user} currently logged in user
    */
@@ -90,26 +92,23 @@ module.exports = {
     }
   },
   /**
-   * Delete a show from the users
+   * DELETE a show from the users
    * @param {showId} the mongoId for the show to remove
    * @param {userId} currently logged in user
    */
-  removeShowFromUser: async ({ params: { id: showId }, user: userId }, res) => {
-    console.log('userId', userId);
-    // remove show from Users show array
-    await db.User.updateOne(
-      { _id: userId },
-      {
-        $pull: { shows: showId },
-      }
-    );
-    // get updated shows array
-    const { shows } = await db.User.findOne(userId).populate('shows');
-    res.json(shows);
-  },
-  //
-  getAllShowsForUser: async ({ user: { _id } }, res) => {
-    const userInfo = await db.User.findOne({ _id }).populate('shows');
-    res.json(userInfo);
+  removeShowFromUser: async (
+    { params: { id: showId }, user: { _id } },
+    res
+  ) => {
+    const results = await db.User.findByIdAndUpdate(
+      _id,
+      { $pull: { shows: showId } },
+      { new: true }
+    )
+      // exclude the password field
+      .select('-password')
+      .populate('shows');
+
+    res.json(results);
   },
 };

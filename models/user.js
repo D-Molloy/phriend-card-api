@@ -56,18 +56,7 @@ userSchema.virtual('showScoreAverage').get(function () {
 
 // create an object that counts the number of times each song has been heard
 userSchema.virtual('timesSongHeard').get(function () {
-  return this.shows.reduce((acc, { setlist }) => {
-    for (key in setlist) {
-      if (Array.isArray(setlist[key])) {
-        for (song of setlist[key]) {
-          acc[song] = ++acc[song] || 1;
-        }
-      }
-    }
-    return acc;
-  }, {});
-  // TODO: this produces a alphabetically sorted list
-  // const timesSongHeard = this.shows.reduce((acc, { setlist }) => {
+  // return this.shows.reduce((acc, { setlist }) => {
   //   for (key in setlist) {
   //     if (Array.isArray(setlist[key])) {
   //       for (song of setlist[key]) {
@@ -77,6 +66,36 @@ userSchema.virtual('timesSongHeard').get(function () {
   //   }
   //   return acc;
   // }, {});
+  const timesSongHeard = this.shows.reduce((acc, { setlist }) => {
+    for (key in setlist) {
+      if (Array.isArray(setlist[key])) {
+        for (song of setlist[key]) {
+          acc[song] = ++acc[song] || 1;
+        }
+      }
+    }
+    return acc;
+  }, {});
+  // TODO: this produces an array of tuples sorted by play count descending
+  var sortable = [];
+  for (var key in timesSongHeard)
+    if (timesSongHeard.hasOwnProperty(key))
+      sortable.push([key, timesSongHeard[key]]); // each item is an array in format [key, value]
+
+  // sort items by value
+  return sortable.sort(function (a, b) {
+    // return a[1] - b[1]; // compare numbers+
+    if (a[1] > b[1]) {
+      return -1;
+    }
+    if (a[1] < b[1]) {
+      return 1;
+    }
+    // a must be equal to b
+    return 0;
+  });
+
+  // TODO: this produces a alphabetically sorted list
   // const ordered = {};
   // Object.keys(timesSongHeard)
   //   .sort()
