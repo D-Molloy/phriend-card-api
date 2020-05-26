@@ -6,11 +6,14 @@ const { validateSignup, validateLogin } = require('../utils/validation');
 // Defining methods for the bookController
 module.exports = {
   create: async (req, res) => {
+
     // validate user info
     const { errors, userData } = validateSignup(req.body);
     if (!userData) {
+ 
       return res.status(400).json(errors);
     }
+    // TODO: check to see if username is taken
     //check if user already exists
     const foundUser = await db.User.findOne({ email: userData.email });
     if (foundUser) {
@@ -26,7 +29,7 @@ module.exports = {
       userData.password = hashedPassword;
       // create user
       await db.User.create(userData);
-      res.send('User created!');
+      res.send('User created! Redirecting to Login.');
     } catch (e) {
       res.status(500).send({
         message: 'Server error.  Please try again.',
@@ -46,7 +49,7 @@ module.exports = {
     if (!foundUser) {
       return res
         .status(404)
-        .json({ message: 'Email not registered. Please create an account.' });
+        .json({ email: 'Email not registered. Please create an account.' });
     }
 
     // Check password
