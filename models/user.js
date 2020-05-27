@@ -53,9 +53,47 @@ userSchema.virtual('showScoreAverage').get(function () {
     this.shows.length
   );
 });
+// 
+userSchema.virtual('venueBreakdown').get(function () {
+  return this.shows.reduce((acc, show) => {
+    const showIndex = acc.findIndex((shows) => shows.venue == show.venue);
+
+    if (showIndex > -1) {
+      acc[showIndex].showCount++;
+      acc[showIndex].shows.push({
+        date: show.date,
+        url:show.phishnetUrl,
+        rating: show.rating,
+        day:show.day,
+      });
+    } else {
+      acc.push({
+        venue: show.venue,
+        location: show.location,
+        showCount: 1,
+        shows: [
+          {
+            date: show.date,
+            url:show.phishnetUrl,
+            rating: show.rating,
+            day:show.day,
+          },
+        ],
+      });
+    }
+    return acc;
+  }, []).map(venue=>{
+    return{
+      ...venue,
+      venueRating: venue.shows.reduce((acc, show)=>acc+show.rating,0)/venue.shows.length
+    }
+  })
+  
+});
 
 // create an object that counts the number of times each song has been heard
-userSchema.virtual('timesSongHeard').get(function () {
+userSchema.virtual('songFrequency').get(function () {
+  // //This returns an object - unable to sort properties by value
   // return this.shows.reduce((acc, { setlist }) => {
   //   for (key in setlist) {
   //     if (Array.isArray(setlist[key])) {

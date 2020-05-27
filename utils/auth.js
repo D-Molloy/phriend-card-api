@@ -19,18 +19,11 @@ const authenticateToken = (req, res, next) => {
 
 const generateAccessToken = (user) => {
   return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: 1000 * 60 * 60,
+    expiresIn: "12h" ,
   });
-};
-
-// TODO: REMOVE BEFORE DEPLOYING
-const middlewareTest = (req, res, next) => {
-  console.log('MIDDLEWARE PLACEHOLDER');
-  next();
 };
 
 module.exports = {
   authenticateToken,
   generateAccessToken,
-  middlewareTest,
 };

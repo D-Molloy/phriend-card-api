@@ -5,13 +5,13 @@ const { validateDate } = require('../utils/validation');
 const apiKey = process.env.PHISHNET_APIKEY;
 
 const updateUserShowArray = async (userId, showId) => {
-  const { shows } = await db.User.findByIdAndUpdate(
+  const user = await db.User.findByIdAndUpdate(
     userId,
     { $addToSet: { shows: showId } },
     { new: true }
   ).populate('shows');
 
-  return shows;
+  return user;
 };
 
 // Defining methods related to setlists
@@ -21,8 +21,8 @@ module.exports = {
    * @param {_id} mongo id for the current user
    */
   getAllShowsForUser: async ({ user: { _id } }, res) => {
-    const { shows } = await db.User.findOne({ _id }).populate('shows');
-    res.json(shows);
+    const foundUser = await db.User.findOne({ _id }).populate('shows');
+    res.json(foundUser);
   },
   /**
    * POST a show on a specific date and add to user's shows array
