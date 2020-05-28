@@ -21,7 +21,7 @@ module.exports = {
    * @param {_id} mongo id for the current user
    */
   getAllShowsForUser: async ({ user: { _id } }, res) => {
-    const foundUser = await db.User.findOne({ _id }).populate('shows');
+    const foundUser = await db.User.findOne({ _id }).select('-password').populate('shows');
     res.json(foundUser);
   },
   /**

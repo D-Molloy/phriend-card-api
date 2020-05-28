@@ -13,11 +13,13 @@ const parseSetlistHtml = showHtml => {
 
     if (className === 'set-label') {
       setCount++;
-      setlistInfo[`set${setCount}`] = [];
+      // TODO: remove - setlistInfo[`set${setCount}`] = [];
+      setlistInfo[`Set ${setCount}`] = [];
     }
 
     if (className === 'setlist-song') {
-      setlistInfo[`set${setCount}`].push(songName);
+      // TODO: remove - setlistInfo[`set${setCount}`].push(songName);
+      setlistInfo[`Set ${setCount}`].push(songName);
       setlistInfo.songCount++;
     }
   });
