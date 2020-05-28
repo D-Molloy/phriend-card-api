@@ -53,19 +53,43 @@ userSchema.virtual('showScoreAverage').get(function () {
     this.shows.length
   );
 });
+// 
+userSchema.virtual('venueSummary').get(function () {
+  return this.shows.reduce((acc, show) => {
+    const showIndex = acc.findIndex((shows) => shows.venue == show.venue);
+    if (showIndex > -1) {
+      acc[showIndex].shows.push({
+        date: show.date,
+        phishnetUrl:show.phishnetUrl,
+        rating: show.rating,
+        day:show.day,
+      });
+    } else {
+      acc.push({
+        venue: show.venue,
+        location: show.location,
+        shows: [
+          {
+            date: show.date,
+            phishnetUrl:show.phishnetUrl,
+            rating: show.rating,
+            day:show.day,
+          },
+        ],
+      });
+    }
+    return acc;
+  }, []).map(venue=>{
+    return{
+      ...venue,
+      venueRating: venue.shows.reduce((acc, show)=>acc+show.rating,0)/venue.shows.length
+    }
+  })
+  
+});
 
 // create an object that counts the number of times each song has been heard
-userSchema.virtual('timesSongHeard').get(function () {
-  // return this.shows.reduce((acc, { setlist }) => {
-  //   for (key in setlist) {
-  //     if (Array.isArray(setlist[key])) {
-  //       for (song of setlist[key]) {
-  //         acc[song] = ++acc[song] || 1;
-  //       }
-  //     }
-  //   }
-  //   return acc;
-  // }, {});
+userSchema.virtual('songFrequency').get(function () {
   const timesSongHeard = this.shows.reduce((acc, { setlist }) => {
     for (key in setlist) {
       if (Array.isArray(setlist[key])) {
@@ -76,7 +100,7 @@ userSchema.virtual('timesSongHeard').get(function () {
     }
     return acc;
   }, {});
-  // TODO: this produces an array of tuples sorted by play count descending
+  // This produces an array of tuples sorted by play count descending
   var sortable = [];
   for (var key in timesSongHeard)
     if (timesSongHeard.hasOwnProperty(key))
@@ -104,7 +128,8 @@ userSchema.virtual('timesSongHeard').get(function () {
   //   });
   // return ordered;
 });
-
+// TODO:  figure out show score by day
+// TODO: showscore by year
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
