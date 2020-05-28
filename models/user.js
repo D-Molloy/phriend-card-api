@@ -54,10 +54,9 @@ userSchema.virtual('showScoreAverage').get(function () {
   );
 });
 // 
-userSchema.virtual('venueBreakdown').get(function () {
+userSchema.virtual('venueSummary').get(function () {
   return this.shows.reduce((acc, show) => {
     const showIndex = acc.findIndex((shows) => shows.venue == show.venue);
-
     if (showIndex > -1) {
       acc[showIndex].showCount++;
       acc[showIndex].shows.push({
