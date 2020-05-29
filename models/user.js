@@ -130,6 +130,7 @@ userSchema.virtual('songFrequency').get(function () {
 });
 // TODO:  figure out show score by day
 // TODO: showscore by year
+// TODO:  Highest and lowest scoring
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
