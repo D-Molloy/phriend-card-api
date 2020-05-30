@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
@@ -7,20 +7,20 @@ const userSchema = new Schema(
     username: {
       type: String,
       trim: true,
-      required: 'Enter a username.',
+      required: "Enter a username.",
       unique: true,
     },
     email: {
       type: String,
       trim: true,
       unique: true,
-      required: 'Enter your email.',
-      match: [/.+@.+\..+/, 'Please enter a valid e-mail address.'],
+      required: "Enter your email.",
+      match: [/.+@.+\..+/, "Please enter a valid e-mail address."],
     },
     password: {
       type: String,
       trim: true,
-      required: 'Password required.',
+      required: "Password required.",
     },
     createdAt: {
       type: Date,
@@ -29,7 +29,7 @@ const userSchema = new Schema(
     shows: [
       {
         type: Schema.Types.ObjectId,
-        ref: 'Show',
+        ref: "Show",
         unique: true,
       },
     ],
@@ -43,53 +43,56 @@ const userSchema = new Schema(
 );
 
 // adds a dynamically-created property to schema
-userSchema.virtual('totalSongsHeard').get(function () {
+userSchema.virtual("totalSongsHeard").get(function () {
   return this.shows.reduce((total, show) => total + show.setlist.songCount, 0);
 });
 // calculate average show rating
-userSchema.virtual('showScoreAverage').get(function () {
+userSchema.virtual("showScoreAverage").get(function () {
   return (
     this.shows.reduce((total, show) => total + show.rating, 0) /
     this.shows.length
   );
 });
-// 
-userSchema.virtual('venueSummary').get(function () {
-  return this.shows.reduce((acc, show) => {
-    const showIndex = acc.findIndex((shows) => shows.venue == show.venue);
-    if (showIndex > -1) {
-      acc[showIndex].shows.push({
-        date: show.date,
-        phishnetUrl:show.phishnetUrl,
-        rating: show.rating,
-        day:show.day,
-      });
-    } else {
-      acc.push({
-        venue: show.venue,
-        location: show.location,
-        shows: [
-          {
-            date: show.date,
-            phishnetUrl:show.phishnetUrl,
-            rating: show.rating,
-            day:show.day,
-          },
-        ],
-      });
-    }
-    return acc;
-  }, []).map(venue=>{
-    return{
-      ...venue,
-      venueRating: venue.shows.reduce((acc, show)=>acc+show.rating,0)/venue.shows.length
-    }
-  })
-  
+//
+userSchema.virtual("venueSummary").get(function () {
+  return this.shows
+    .reduce((acc, show) => {
+      const showIndex = acc.findIndex((shows) => shows.venue == show.venue);
+      if (showIndex > -1) {
+        acc[showIndex].shows.push({
+          date: show.date,
+          phishnetUrl: show.phishnetUrl,
+          rating: show.rating,
+          day: show.day,
+        });
+      } else {
+        acc.push({
+          venue: show.venue,
+          location: show.location,
+          shows: [
+            {
+              date: show.date,
+              phishnetUrl: show.phishnetUrl,
+              rating: show.rating,
+              day: show.day,
+            },
+          ],
+        });
+      }
+      return acc;
+    }, [])
+    .map((venue) => {
+      return {
+        ...venue,
+        venueRating:
+          venue.shows.reduce((acc, show) => acc + show.rating, 0) /
+          venue.shows.length,
+      };
+    });
 });
 
 // create an object that counts the number of times each song has been heard
-userSchema.virtual('songFrequency').get(function () {
+userSchema.virtual("songFrequency").get(function () {
   const timesSongHeard = this.shows.reduce((acc, { setlist }) => {
     for (key in setlist) {
       if (Array.isArray(setlist[key])) {
@@ -131,6 +134,6 @@ userSchema.virtual('songFrequency').get(function () {
 // TODO:  figure out show score by day
 // TODO: showscore by year
 // TODO:  Highest and lowest scoring
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 
 module.exports = User;
