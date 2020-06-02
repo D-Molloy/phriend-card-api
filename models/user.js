@@ -56,26 +56,49 @@ userSchema.virtual("showScoreAverage").get(function () {
 // get the average score for all shows on a particular day
 userSchema.virtual("avgShowScoreByDay").get(function () {
   return this.shows
-  .reduce((acc, show) => {
-    const showIndex = acc.findIndex((shows) => shows.day === show.day);
-    if (showIndex > -1) {
-      acc[showIndex].ratings.push(show.rating);
-    } else {
-      acc.push({
-        day: show.day,
-        ratings: [show.rating],
-      });
-    }
-    return acc;
-  }, [])
-  .map(({day, ratings}) => {
-    return {
-      day,
-      rating:
-        ratings.reduce((acc, rating) => acc + rating, 0) /
-        ratings.length,
-    };
-  });
+    .reduce((acc, show) => {
+      const showIndex = acc.findIndex((shows) => shows.day === show.day);
+      if (showIndex > -1) {
+        acc[showIndex].ratings.push(show.rating);
+      } else {
+        acc.push({
+          day: show.day,
+          ratings: [show.rating],
+        });
+      }
+      return acc;
+    }, [])
+    .map(({ day, ratings }) => {
+      return {
+        day,
+        rating:
+          ratings.reduce((acc, rating) => acc + rating, 0) / ratings.length,
+      };
+    });
+});
+// get the average score for all shows by year
+userSchema.virtual("avgShowScoreByYear").get(function () {
+  return this.shows
+    .reduce((acc, show) => {
+      const currentYear = show.date.substring(0, 4);
+      const showIndex = acc.findIndex((shows) => shows.year === currentYear);
+      if (showIndex > -1) {
+        acc[showIndex].ratings.push(show.rating);
+      } else {
+        acc.push({
+          year: currentYear,
+          ratings: [show.rating],
+        });
+      }
+      return acc;
+    }, [])
+    .map(({ year, ratings }) => {
+      return {
+        year,
+        rating:
+          ratings.reduce((acc, rating) => acc + rating, 0) / ratings.length,
+      };
+    });
 });
 // get tally of score by venue and all shows at venue
 userSchema.virtual("venueSummary").get(function () {
