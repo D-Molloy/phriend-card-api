@@ -9,10 +9,16 @@ const updateUserShowArray = async (userId, showId) => {
     userId,
     { $addToSet: { shows: showId } },
     { new: true }
-  ).populate('shows');
-
+  ).select('-password -_id -email').populate('shows');
+  user.shows =  sortShowsByDateDesc(user.shows)
   return user;
 };
+
+const sortShowsByDateDesc = (arr)=>{
+  return arr.sort(function(a, b) {
+    return a.date>b.date ? -1 : a.date<b.date ? 1 : 0;
+});
+}
 
 // Defining methods related to setlists
 module.exports = {
@@ -21,8 +27,8 @@ module.exports = {
    * @param {_id} mongo id for the current user
    */
   getAllUserData: async ({ user: { _id } }, res) => {
-    const foundUser = await db.User.findById( _id ).select('-password -_id -email').populate('shows');
-    // const foundUser = await db.User.findOne({ _id }).select('-password -id').populate('shows');
+    const foundUser = await db.User.findById( _id ).select('-password -_id -email').populate('shows')
+    foundUser.shows =  sortShowsByDateDesc(foundUser.shows)
     res.json(foundUser);
   },
   /**

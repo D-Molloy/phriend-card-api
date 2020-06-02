@@ -53,7 +53,31 @@ userSchema.virtual("showScoreAverage").get(function () {
     this.shows.length
   );
 });
-//
+// get the average score for all shows on a particular day
+userSchema.virtual("avgShowScoreByDay").get(function () {
+  return this.shows
+  .reduce((acc, show) => {
+    const showIndex = acc.findIndex((shows) => shows.day === show.day);
+    if (showIndex > -1) {
+      acc[showIndex].ratings.push(show.rating);
+    } else {
+      acc.push({
+        day: show.day,
+        ratings: [show.rating],
+      });
+    }
+    return acc;
+  }, [])
+  .map(({day, ratings}) => {
+    return {
+      day,
+      rating:
+        ratings.reduce((acc, rating) => acc + rating, 0) /
+        ratings.length,
+    };
+  });
+});
+// get tally of score by venue and all shows at venue
 userSchema.virtual("venueSummary").get(function () {
   return this.shows
     .reduce((acc, show) => {
@@ -111,6 +135,7 @@ userSchema.virtual("songFrequency").get(function () {
 
   // sort items by value
   return sortable.sort(function (a, b) {
+    // TODO: update to use ternary found in getting user data => setlist controller
     // return a[1] - b[1]; // compare numbers+
     if (a[1] > b[1]) {
       return -1;
