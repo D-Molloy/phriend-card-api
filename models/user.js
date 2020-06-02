@@ -71,6 +71,7 @@ userSchema.virtual("avgShowScoreByDay").get(function () {
     .map(({ day, ratings }) => {
       return {
         day,
+        shows: ratings.length,
         rating:
           ratings.reduce((acc, rating) => acc + rating, 0) / ratings.length,
       };
@@ -95,6 +96,7 @@ userSchema.virtual("avgShowScoreByYear").get(function () {
     .map(({ year, ratings }) => {
       return {
         year,
+        shows: ratings.length,
         rating:
           ratings.reduce((acc, rating) => acc + rating, 0) / ratings.length,
       };
