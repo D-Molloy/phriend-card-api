@@ -9,10 +9,16 @@ const updateUserShowArray = async (userId, showId) => {
     userId,
     { $addToSet: { shows: showId } },
     { new: true }
-  ).populate('shows');
-
+  ).select('-password -_id -email').populate('shows');
+  user.shows =  sortShowsByDateDesc(user.shows)
   return user;
 };
+
+const sortShowsByDateDesc = (arr)=>{
+  return arr.sort(function(a, b) {
+    return a.date>b.date ? -1 : a.date<b.date ? 1 : 0;
+});
+}
 
 // Defining methods related to setlists
 module.exports = {
@@ -20,8 +26,9 @@ module.exports = {
    * GET shows array for current user
    * @param {_id} mongo id for the current user
    */
-  getAllShowsForUser: async ({ user: { _id } }, res) => {
-    const foundUser = await db.User.findOne({ _id }).select('-password').populate('shows');
+  getAllUserData: async ({ user: { _id } }, res) => {
+    const foundUser = await db.User.findById( _id ).select('-password -_id -email').populate('shows')
+    foundUser.shows =  sortShowsByDateDesc(foundUser.shows)
     res.json(foundUser);
   },
   /**
@@ -30,6 +37,7 @@ module.exports = {
    * @param {user} currently logged in user
    */
   addSetlistByDate: async ({ body, user }, res) => {
+    console.log('body', body)
     // validate user submitted showdate
     const { errors, showDate } = validateDate(body);
     if (!showDate) {
@@ -56,7 +64,7 @@ module.exports = {
         );
 
         if (response.count === 0) {
-          return res.status(400).send('No show on that date.');
+          return res.status(400).json({message:'No show on that date.'});
         }
         const {
           data: [showData],
