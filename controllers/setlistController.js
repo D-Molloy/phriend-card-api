@@ -1,7 +1,7 @@
-const db = require('../models');
-const axios = require('axios');
-const { parseSetlistHtml, parseVenueHtml } = require('../utils/phishnet');
-const { validateDate } = require('../utils/validation');
+const db = require("../models");
+const axios = require("axios");
+const { parseSetlistHtml, parseVenueHtml } = require("../utils/phishnet");
+const { validateDate } = require("../utils/validation");
 const apiKey = process.env.PHISHNET_APIKEY;
 
 const updateUserShowArray = async (userId, showId) => {
@@ -9,16 +9,18 @@ const updateUserShowArray = async (userId, showId) => {
     userId,
     { $addToSet: { shows: showId } },
     { new: true }
-  ).select('-password -_id -email').populate('shows');
-  user.shows =  sortShowsByDateDesc(user.shows)
+  )
+    .select("-password -_id -email")
+    .populate("shows");
+  user.shows = sortShowsByDateDesc(user.shows);
   return user;
 };
 
-const sortShowsByDateDesc = (arr)=>{
-  return arr.sort(function(a, b) {
-    return a.date>b.date ? -1 : a.date<b.date ? 1 : 0;
-});
-}
+const sortShowsByDateDesc = (arr) => {
+  return arr.sort(function (a, b) {
+    return a.date > b.date ? -1 : a.date < b.date ? 1 : 0;
+  });
+};
 
 // Defining methods related to setlists
 module.exports = {
@@ -27,8 +29,10 @@ module.exports = {
    * @param {_id} mongo id for the current user
    */
   getAllUserData: async ({ user: { _id } }, res) => {
-    const foundUser = await db.User.findById( _id ).select('-password -_id -email').populate('shows')
-    foundUser.shows =  sortShowsByDateDesc(foundUser.shows)
+    const foundUser = await db.User.findById(_id)
+      .select("-password -_id -email")
+      .populate("shows");
+    foundUser.shows = sortShowsByDateDesc(foundUser.shows);
     res.json(foundUser);
   },
   /**
@@ -37,7 +41,7 @@ module.exports = {
    * @param {user} currently logged in user
    */
   addSetlistByDate: async ({ body, user }, res) => {
-    console.log('body', body)
+    console.log("body", body);
     // validate user submitted showdate
     const { errors, showDate } = validateDate(body);
     if (!showDate) {
@@ -64,7 +68,7 @@ module.exports = {
         );
 
         if (response.count === 0) {
-          return res.status(400).json({message:'No show on that date.'});
+          return res.status(400).json({ message: "No show on that date." });
         }
         const {
           data: [showData],
@@ -76,7 +80,7 @@ module.exports = {
           venue: parseVenueHtml(showData.venue),
           location: showData.location,
           date: showData.showdate,
-          day: showData.long_date.split(' ')[0],
+          day: showData.long_date.split(" ")[0],
           rating: parseFloat(showData.rating),
           setlist: parseSetlistHtml(showData.setlistdata),
         };
@@ -89,13 +93,13 @@ module.exports = {
             await updateUserShowArray(currentUser, createdShow._id)
           );
         } catch (e) {
-          return res.status(500).send('error creating show');
+          return res.status(500).send("error creating show");
         }
       } catch (e) {
-        console.log('Error getting show:', e);
+        console.log("Error getting show:", e);
         return res
           .status(400)
-          .send('Error.  Please check the show date and try again.');
+          .send("Error.  Please check the show date and try again.");
       }
     }
   },
@@ -114,8 +118,8 @@ module.exports = {
       { new: true }
     )
       // exclude the password field
-      .select('-password')
-      .populate('shows');
+      .select("-password")
+      .populate("shows");
 
     res.json(results);
   },
