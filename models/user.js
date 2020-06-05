@@ -42,7 +42,7 @@ const userSchema = new Schema(
   }
 );
 
-// adds a dynamically-created property to schema
+// total songs heard
 userSchema.virtual("totalSongsHeard").get(function () {
   return this.shows.reduce((total, show) => total + show.setlist.songCount, 0);
 });
@@ -53,6 +53,35 @@ userSchema.virtual("showScoreAverage").get(function () {
     this.shows.length
   );
 });
+// return best show by phish.net rating
+userSchema.virtual("showBest").get(function () {
+return this.shows.reduce((max, currentValue) => {
+  if( max.rating > currentValue.rating){
+    return max
+  } else{
+    return currentValue
+  }
+ }, this.shows[0])
+});
+// return worst show by phish.net rating
+userSchema.virtual("showWorst").get(function () {
+return this.shows.reduce((min, currentValue) => {
+  if( min.rating < currentValue.rating){
+    return min
+  } else{
+    return currentValue
+  }
+ }, this.shows[0])
+});
+// return best show by phish.net rating
+userSchema.virtual("bestShow").get(function () {
+  return (
+    this.shows.reduce((total, show) => total + show.rating, 0) /
+    this.shows.length
+  );
+});
+
+
 // get the average score for all shows on a particular day
 userSchema.virtual("avgShowScoreByDay").get(function () {
   return this.shows
