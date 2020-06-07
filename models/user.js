@@ -42,7 +42,7 @@ const userSchema = new Schema(
   }
 );
 
-// adds a dynamically-created property to schema
+// total songs heard
 userSchema.virtual("totalSongsHeard").get(function () {
   return this.shows.reduce((total, show) => total + show.setlist.songCount, 0);
 });
@@ -53,6 +53,35 @@ userSchema.virtual("showScoreAverage").get(function () {
     this.shows.length
   );
 });
+// return best show by phish.net rating
+userSchema.virtual("showBest").get(function () {
+return this.shows.reduce((max, currentValue) => {
+  if( max.rating > currentValue.rating){
+    return max
+  } else{
+    return currentValue
+  }
+ }, this.shows[0])
+});
+// return worst show by phish.net rating
+userSchema.virtual("showWorst").get(function () {
+return this.shows.reduce((min, currentValue) => {
+  if( min.rating < currentValue.rating){
+    return min
+  } else{
+    return currentValue
+  }
+ }, this.shows[0])
+});
+// return best show by phish.net rating
+userSchema.virtual("bestShow").get(function () {
+  return (
+    this.shows.reduce((total, show) => total + show.rating, 0) /
+    this.shows.length
+  );
+});
+
+
 // get the average score for all shows on a particular day
 userSchema.virtual("avgShowScoreByDay").get(function () {
   return this.shows
@@ -75,6 +104,9 @@ userSchema.virtual("avgShowScoreByDay").get(function () {
         rating:
           ratings.reduce((acc, rating) => acc + rating, 0) / ratings.length,
       };
+    })
+    .sort(function (a, b) {
+      return a.rating > b.rating ? -1 : a.rating < b.rating ? 1 : 0;
     });
 });
 // get the average score for all shows by year
@@ -100,6 +132,9 @@ userSchema.virtual("avgShowScoreByYear").get(function () {
         rating:
           ratings.reduce((acc, rating) => acc + rating, 0) / ratings.length,
       };
+    })
+    .sort(function (a, b) {
+      return a.rating > b.rating ? -1 : a.rating < b.rating ? 1 : 0;
     });
 });
 // get tally of score by venue and all shows at venue
@@ -160,16 +195,7 @@ userSchema.virtual("songFrequency").get(function () {
 
   // sort items by value
   return sortable.sort(function (a, b) {
-    // TODO: update to use ternary found in getting user data => setlist controller
-    // return a[1] - b[1]; // compare numbers+
-    if (a[1] > b[1]) {
-      return -1;
-    }
-    if (a[1] < b[1]) {
-      return 1;
-    }
-    // a must be equal to b
-    return 0;
+    return a[1] > b[1] ? -1 : a[1] < b[1] ? 1 : 0;
   });
 
   // TODO: this produces a alphabetically sorted list
@@ -181,8 +207,7 @@ userSchema.virtual("songFrequency").get(function () {
   //   });
   // return ordered;
 });
-// TODO:  figure out show score by day
-// TODO: showscore by year
+
 // TODO:  Highest and lowest scoring
 const User = mongoose.model("User", userSchema);
 
