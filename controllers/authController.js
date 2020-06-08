@@ -9,6 +9,8 @@ module.exports = {
 
     // validate user info
     const { errors, userData } = validateSignup(req.body);
+    console.log('userData', userData)  
+  
     if (!userData) {
  
       return res.status(400).json(errors);
@@ -27,12 +29,15 @@ module.exports = {
       // hash the password
       const hashedPassword = await bcrypt.hash(userData.password, 10);
       userData.password = hashedPassword;
+      console.log('userData', userData)
       // create user
+  
       await db.User.create(userData);
       res.send('User created! Redirecting to Login.');
     } catch (e) {
+      console.log('e', e)
       res.status(500).send({
-        message: 'Server error.  Please try again.',
+        message: 'Server error.  Please try again later.',
         data: e.message,
       });
     }

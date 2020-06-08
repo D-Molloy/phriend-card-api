@@ -6,12 +6,12 @@ const showSchema = new Schema({
   phishnetShowId: {
     type: Number,
     trim: true,
-    unique: true,
+    // unique: true,
   },
   phishnetUrl: {
     type: String,
     trim: true,
-    default: 'https://www.phish.net/',
+    // default: 'https://www.phish.net/',
   },
   venue: {
     type: String,
