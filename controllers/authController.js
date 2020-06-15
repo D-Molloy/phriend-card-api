@@ -9,6 +9,7 @@ module.exports = {
 
     // validate user info
     const { errors, userData } = validateSignup(req.body);
+  
     if (!userData) {
  
       return res.status(400).json(errors);
@@ -28,11 +29,12 @@ module.exports = {
       const hashedPassword = await bcrypt.hash(userData.password, 10);
       userData.password = hashedPassword;
       // create user
+  
       await db.User.create(userData);
       res.send('User created! Redirecting to Login.');
     } catch (e) {
       res.status(500).send({
-        message: 'Server error.  Please try again.',
+        message: 'Server error.  Please try again later.',
         data: e.message,
       });
     }
