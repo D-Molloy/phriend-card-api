@@ -41,7 +41,6 @@ module.exports = {
    * @param {user} currently logged in user
    */
   addSetlistByDate: async ({ body, user }, res) => {
-    console.log("body", body);
     // validate user submitted showdate
     const { errors, showDate } = validateDate(body);
     if (!showDate) {
