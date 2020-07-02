@@ -26,7 +26,7 @@ const sortShowsByDateDesc = (arr) => {
 module.exports = {
   /**
    * GET shows array for current user
-   * @param {_id} mongo id for the current user
+   * @param {_id} mongoId for the current user
    */
   getAllUserData: async ({ user: { _id } }, res) => {
     const foundUser = await db.User.findById(_id)
