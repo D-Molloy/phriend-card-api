@@ -111,7 +111,7 @@ module.exports = {
     { params: { id: showId }, user: { _id } },
     res
   ) => {
-    const results = await db.User.findByIdAndUpdate(
+    const user = await db.User.findByIdAndUpdate(
       _id,
       { $pull: { shows: showId } },
       { new: true }
@@ -119,7 +119,7 @@ module.exports = {
       // exclude the password field
       .select("-password")
       .populate("shows");
-
-    res.json(results);
+      user.shows = sortShowsByDateDesc(user.shows)
+    res.json(user);
   },
 };

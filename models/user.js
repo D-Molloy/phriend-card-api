@@ -46,6 +46,7 @@ const userSchema = new Schema(
 userSchema.virtual("totalSongsHeard").get(function () {
   return this.shows.reduce((total, show) => total + show.setlist.songCount, 0);
 });
+
 // calculate average show rating
 userSchema.virtual("showScoreAverage").get(function () {
   return (

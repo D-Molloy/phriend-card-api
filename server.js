@@ -3,6 +3,7 @@ const express = require('express');
 const logger = require('morgan');
 const mongoose = require('mongoose');
 var cors = require('cors')
+// app.use(cors())
 
 
 const routes = require('./routes');
@@ -18,7 +19,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(logger('dev'));
 // TODO: Setup CORS
-// app.use(cors())
 app.use(
   cors({
     origin: function (origin, callback) {
