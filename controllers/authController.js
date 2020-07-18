@@ -6,12 +6,10 @@ const { validateSignup, validateLogin } = require('../utils/validation');
 // Defining methods for the bookController
 module.exports = {
   create: async (req, res) => {
-
     // validate user info
     const { errors, userData } = validateSignup(req.body);
   
     if (!userData) {
- 
       return res.status(400).json(errors);
     }
     // TODO: check to see if username is taken
@@ -33,8 +31,9 @@ module.exports = {
       await db.User.create(userData);
       res.send('User created! Redirecting to Login.');
     } catch (e) {
-      res.status(500).send({
-        message: 'Server error.  Please try again later.',
+      // TODO: clean up - any mongo errors are thrown here.  switch to a 400 bc it's usually in regards to username
+      res.status(400).send({
+        username: 'Username already registered.  Try Again.',
         data: e.message,
       });
     }

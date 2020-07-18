@@ -45,7 +45,7 @@ const validateSignup = (data) => {
   if (!isEmail(userData.email)) {
     errors.email = 'Please enter a valid email.';
   }
-
+  userData.email = userData.email.trim()
   if (isEmpty(userData.password)) {
     errors.password = 'Password field required.';
   }
