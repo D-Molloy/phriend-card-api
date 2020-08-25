@@ -2,7 +2,6 @@
 const jwt = require('jsonwebtoken');
 
 // ensure the jwt is present and valid
-// TODO: Move to auth route
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   // if the authHeader doesn't exist, token will be undefined
