@@ -2,10 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const logger = require('morgan');
 const mongoose = require('mongoose');
-var cors = require('cors')
-// app.use(cors())
-
-
+const cors = require('cors');
 const routes = require('./routes');
 const app = express();
 const PORT = process.env.PORT || 8081;
@@ -18,7 +15,6 @@ const allowedOrigins = [
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(logger('dev'));
-// TODO: Setup CORS
 app.use(
   cors({
     origin: function (origin, callback) {

@@ -74,15 +74,6 @@ return this.shows.reduce((min, currentValue) => {
   }
  }, this.shows[0])
 });
-// return best show by phish.net rating
-userSchema.virtual("bestShow").get(function () {
-  return (
-    this.shows.reduce((total, show) => total + show.rating, 0) /
-    this.shows.length
-  );
-});
-
-
 // get the average score for all shows on a particular day
 userSchema.virtual("avgShowScoreByDay").get(function () {
   return this.shows
@@ -199,7 +190,7 @@ userSchema.virtual("songFrequency").get(function () {
     return a[1] > b[1] ? -1 : a[1] < b[1] ? 1 : 0;
   });
 
-  // TODO: this produces a alphabetically sorted list
+  // this produces a alphabetically sorted list
   // const ordered = {};
   // Object.keys(timesSongHeard)
   //   .sort()
@@ -209,7 +200,6 @@ userSchema.virtual("songFrequency").get(function () {
   // return ordered;
 });
 
-// TODO:  Highest and lowest scoring
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
