@@ -7,7 +7,7 @@ const routes = require('./routes');
 const app = express();
 const PORT = process.env.PORT || 8081;
 const allowedOrigins = [
-  'http://localhost:8080',
+  // 'http://localhost:8080',
   // 'https://phriendscore.netlify.app',
   'https://www.phriendscore.com'
 ];
